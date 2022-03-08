@@ -14,6 +14,7 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 rootProject.name = "serde-parent"
 
+include("serde-adhoc")
 include("serde-bom")
 include("serde-processor")
 include("serde-api")
