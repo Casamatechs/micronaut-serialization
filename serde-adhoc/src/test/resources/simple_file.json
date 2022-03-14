@@ -1,0 +1,23 @@
+{
+  "name": "Marlon West",
+  "accountNumber": 3785821933,
+  "balance": 596.86,
+  "isActive": true,
+  "favoriteAccounts": [
+    {
+      "name": "Dr. Terrance Kub",
+      "accountNumber": 7229280333,
+      "isActive": false
+    },
+    {
+      "name": "Blake Lueilwitz",
+      "accountNumber": 9624373371,
+      "isActive": false
+    },
+    {
+      "name": "Marc Paucek",
+      "accountNumber": 5323545167,
+      "isActive": true
+    }
+  ]
+}

@@ -1,17 +1,42 @@
+/*
+ * Copyright 2017-2022 original authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package io.micronaut.serde.adhoc;
 
 import io.micronaut.core.type.Argument;
 import io.micronaut.json.JsonStreamConfig;
 import io.micronaut.json.tree.JsonNode;
 import io.micronaut.serde.ObjectMapper;
+import io.micronaut.serde.adhoc.parser.AdhocParser;
+import io.micronaut.serde.adhoc.pojo.Account;
+import io.micronaut.serde.adhoc.pojo.OtherAccount;
 import org.reactivestreams.Processor;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Map;
 import java.util.function.Consumer;
 
+/**
+ *
+ */
 public class AdhocJsonMapper implements ObjectMapper {
+
+    private static final String [] JSON_FIELDS = {"name", "accountNumber", "balance", "isActive", "favoriteAccounts"};
+
     /**
      * Transform a {@link JsonNode} to a value of the given type.
      *
@@ -33,7 +58,7 @@ public class AdhocJsonMapper implements ObjectMapper {
      */
     @Override
     public <T> T readValue(InputStream inputStream, Argument<T> type) throws IOException {
-        return null;
+        return this.readValue(inputStream.readAllBytes(), type);
     }
 
     /**
@@ -45,7 +70,45 @@ public class AdhocJsonMapper implements ObjectMapper {
      */
     @Override
     public <T> T readValue(byte[] byteArray, Argument<T> type) throws IOException {
-        return null;
+        try (AdhocParser parser = new AdhocParser(byteArray)) {
+            return readValue(parser, type);
+        }
+    }
+
+    /**
+     *
+     * @param parser Ad-hoc parser built for the Account POJO
+     * @param type Object type (will always be Account)
+     * @param <T>
+     * @return
+     * @throws IOException
+     */
+    @SuppressWarnings({"unchecked"})
+    private <T> T readValue(AdhocParser parser, Argument<T> type) {
+        boolean loopControl = true;
+        while (loopControl) {
+            loopControl = parser.nextToken() != null;
+        }
+        Map keysValues = parser.getDeserializeMap(); // Extract the map with the JSON information.
+        Account json = new Account((String) keysValues.get(JSON_FIELDS[0]),
+                (long) keysValues.get(JSON_FIELDS[1]),
+                (double) keysValues.get(JSON_FIELDS[2]),
+                (boolean) keysValues.get(JSON_FIELDS[3]),
+                new OtherAccount[]{composeOtherAccount(keysValues, 0),
+                        composeOtherAccount(keysValues, 1),
+                        composeOtherAccount(keysValues, 2)
+        });
+        return (T) json;
+    }
+
+    private OtherAccount composeOtherAccount(Map keysValues, int idx) {
+        return new OtherAccount((String) getOtherAccountValues(keysValues, idx).get(JSON_FIELDS[0]),
+                (long) getOtherAccountValues(keysValues, idx).get(JSON_FIELDS[1]),
+                (boolean) getOtherAccountValues(keysValues, idx).get(JSON_FIELDS[3]));
+    }
+
+    private Map getOtherAccountValues(Map jsonMap, int idx) {
+        return ((Map[]) jsonMap.get(JSON_FIELDS[4]))[idx];
     }
 
     /**

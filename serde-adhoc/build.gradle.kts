@@ -1,5 +1,6 @@
 plugins {
     id("io.micronaut.build.internal.module")
+    id("me.champeau.jmh") version "0.6.6"
 }
 
 dependencies {
@@ -16,6 +17,10 @@ dependencies {
     testImplementation(projects.serdeProcessor)
     testImplementation(projects.serdeTck)
     testImplementation(mn.micronaut.inject.java.test)
+    testImplementation(mn.micronaut.test.junit5)
+    testRuntimeOnly(
+            "org.junit.jupiter:junit-jupiter-engine"
+    )
     testCompileOnly(mn.micronaut.inject.groovy)
     testImplementation(mn.micronaut.test.spock)
     testImplementation(mn.jackson.databind)
@@ -27,3 +32,8 @@ dependencies {
     testImplementation("com.amazonaws:aws-lambda-java-events:3.11.0")
 }
 
+tasks {
+    test {
+        useJUnitPlatform()
+    }
+}

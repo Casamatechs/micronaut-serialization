@@ -1,5 +1,6 @@
 plugins {
     id("io.micronaut.build.internal.module")
+    id("me.champeau.jmh") version "0.6.6"
 }
 
 dependencies {
